@@ -11,10 +11,10 @@ class Controller:
         self.root = tk.Tk()
         self.view = View(self.root, self)
         self.loginView = LoginView(self.root, self)
-        self.host = 'localhost' # Reokace with server IP address
-        self.port = 3300 # Replace with server's port number
-        self.key = Fernet.generate_key()
-        self.cipherSuite = Fernet(key)
+        self.host = socket.gethostbyname(socket.gethostname()) # Replace with server IP address
+        self.port = 8000 # Replace with server's port number
+        self.key = None
+        
 
     def run(self) -> None:
         self.root.title("Computer Networks Project")
@@ -30,10 +30,12 @@ class Controller:
         else:
             messagebox.showerror("Login Failed", "Invalid username or password")
 
-    def setup_connection():
+    def setup_connection(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_tcp:
             client_tcp.connect((self.host, self.port))
-
+            client_tcp.send(f"{self.loginView.usernameInput.get()}:{self.loginView.passwordInput.get()}".encode("utf-8"))
+            response = client_tcp.recv(BUFFER_SIZE).decode("utf-8")
+            print(response)
 
 if __name__ == "__main__":
     c = Controller()

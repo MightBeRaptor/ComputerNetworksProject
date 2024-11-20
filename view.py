@@ -21,7 +21,7 @@ class LoginView:
         self.usernameInput = tk.Entry(master=root)
         self.passwordLabel = tk.Label(master=root, font=("Helvetica", 12, "normal"), text="Password:")
         self.passwordInput = tk.Entry(master=root, show="*")
-        self.loginButton = tk.Button(master=root, text="Login", command=self.controller.login)
+        self.loginButton = tk.Button(master=root, text="Login", command=self.controller.setup_connection)
     
     def pack_widgets(self) -> None:
         self.titleLabel.pack()
