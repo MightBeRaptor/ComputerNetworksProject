@@ -30,10 +30,13 @@ class Controller:
         else:
             messagebox.showerror("Login Failed", "Invalid username or password")
 
+    def logout(self) -> None:
+        return
+
     def setup_connection(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_tcp:
             client_tcp.connect((self.host, self.port))
-            client_tcp.send(f"{self.loginView.usernameInput.get()}:{self.loginView.passwordInput.get()}".encode("utf-8"))
+            client_tcp.send(f"LOGIN:{self.loginView.usernameInput.get()}:{self.loginView.passwordInput.get()}".encode("utf-8"))
             response = client_tcp.recv(BUFFER_SIZE).decode("utf-8")
             print(response)
 

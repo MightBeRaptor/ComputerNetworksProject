@@ -7,9 +7,11 @@ class View:
         self.controller = controller
 
         self.titleLabel = tk.Label(master=root, font=("Helvetica", 22, "bold"), text="Computer Networks Project")
+        self.logoutButton = tk.Button(master=root, text="LogOut")
 
     def pack_widgets(self) -> None:
         self.titleLabel.place(x=125, y=25)
+        self.logoutButton.place(x=125, y=50)
 
 class LoginView:
     def __init__(self, root, controller) -> None:

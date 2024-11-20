@@ -1,8 +1,17 @@
 import socket
 from threading import Thread
 from cryptography.fernet import Fernet
+import os
 
 BUFFER_SIZE = 1024
+
+key = Fernet.generate_key()
+
+USER_DB = {
+    "username":"password"
+}
+
+SESSIONS = {}
 
 class Server:
     def __init__(self):
@@ -12,18 +21,26 @@ class Server:
         self.key = Fernet.generate_key()
         self.cipherSuite = Fernet(self.key)
 
+    def authenticate(self, username, password):
+        return USER_DB.get(username) == password
+
     def handle_client(self, client_socket, client_addr):
+        session_id = None
+        authenticated = False
         print(f"[*] New Connection: {client_addr} connected.")
         while True:
             data = client_socket.recv(BUFFER_SIZE).decode("utf-8")
             if not data:
                 break
-            username, password = data.split(":")
-            if username == "username" and password == "password":
-                client_socket.send("True").encode("utf-8")
-            else:
-                client_socket.send("False").encode("utf-8")
+            if data.startswith("LOGIN"):
+                _, username, password = data.split(":")
+                if authenticate(username, password):
+                    session_id = os.urandom(16).hex()
+                    SESSIONS[session_id] = username
+                    authenticated = True
         client_socket.close()
+        if session_id:
+            del SESSIONS[session_id]
 
     def start(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_tcp:
