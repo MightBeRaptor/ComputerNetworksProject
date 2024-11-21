@@ -8,6 +8,10 @@ class View:
 
         self.titleLabel = tk.Label(master=root, font=("Helvetica", 22, "bold"), text="Computer Networks Project")
 
+        # add download button
+        self.downloadButton = tk.Button(master=root, text="Download File", command=controller.download_file)
+        # end additions
+
     def pack_widgets(self) -> None:
         self.titleLabel.place(x=125, y=25)
 
