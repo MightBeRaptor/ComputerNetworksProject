@@ -22,6 +22,18 @@ class Controller:
         else:
             messagebox.showerror("Login Failed", "Invalid username or password")
 
+    # download additions
+    def download_file(self):
+        filename = filedialog.askstring("Download", "Enter the filename to download:")
+        if filename:
+            try:
+                # Call the download logic here
+                download_file(filename)
+                messagebox.showinfo("Download", f"{filename} downloaded successfully.")
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+    #end additions
+
 if __name__ == "__main__":
     c = Controller()
     c.run()
