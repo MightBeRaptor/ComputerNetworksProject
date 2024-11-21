@@ -2,6 +2,11 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from view import View, LoginView
 
+# download additions
+from client_operations import download_file
+from tkinter import filedialog
+# end additions
+
 class Controller:
     def __init__(self) -> None:
         self.root = tk.Tk()
@@ -24,14 +29,19 @@ class Controller:
 
     # download additions
     def download_file(self):
-        filename = filedialog.askstring("Download", "Enter the filename to download:")
-        if filename:
+        server_ip = filedialog.askstring("Server IP", "Enter the server IP:")
+        port = 9999  # Default port; you can make it configurable
+        filename = filedialog.askstring("Filename", "Enter the filename to download:")
+        save_path = filedialog.askdirectory(title="Select Save Directory")
+
+        if server_ip and filename and save_path:
             try:
-                # Call the download logic here
-                download_file(filename)
+                download_file(server_ip, port, filename, save_path)
                 messagebox.showinfo("Download", f"{filename} downloaded successfully.")
             except Exception as e:
                 messagebox.showerror("Error", str(e))
+        else:
+            messagebox.showwarning("Input Missing", "Please provide all required inputs.")
     #end additions
 
 if __name__ == "__main__":
