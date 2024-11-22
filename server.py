@@ -11,13 +11,18 @@ USER_DB = {
 
 SESSIONS = {}
 
+FILE_STORAGE_PATH = "./file_storage" # Directory to store files on server
+
 class Server:
     def __init__(self):
         self.host = socket.gethostbyname(socket.gethostname()) # Change to server host
         self.port = 8000 # Change to server port
         
-        self.key = Fernet.generate_key()
+        self.key = Fernet.generate_key() # Encryption key
         self.cipherSuite = Fernet(self.key)
+        
+        if not os.path.exists(FILE_STORAGE_PATH):
+            os.makedirs(FILE_STORAGE_PATH)  # Ensure storage directory exists
 
     def authenticate(self, username, password):
         return USER_DB.get(username) == password
@@ -51,7 +56,17 @@ class Server:
                 else:
                     client_socket.send(b'FILE NOT FOUND')
             elif data.startswith("DELETE"):
-                return
+                _, file_name = data.split(":") # Handle file delete request.
+                file_path = os.path.join(FILE_STORAGE_PATH, file_name)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    client_socket.send(f"File {file_name} deleted successfully".encode("utf-8"))
+                else:
+                    client_socket.send(f"File {file_name} not found.".encode("utf-8"))
+            elif data.startswith("DIR"):
+                files = os.listdir(FILE_STORAGE_PATH) #List files in server directory.
+                files_list = "\n".join(files)
+                client_socket.send(f"Files in directory:\n{files_list}".encode("utf-8"))
             else:
                 break
         print(f'[*] Terminated connection from IP {client_addr[0]} port : {client_addr[1]}')
