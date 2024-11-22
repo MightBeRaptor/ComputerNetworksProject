@@ -2,7 +2,6 @@ import socket
 from threading import Thread
 from cryptography.fernet import Fernet
 import os
-import ssl
 
 BUFFER_SIZE = 1024
 
@@ -44,6 +43,8 @@ class Server:
             elif data.startswith("UPLOAD"):
                 return
             elif data.startswith("DOWNLOAD"):
+                return
+            elif data.startswith("DELETE"):
                 return
             else:
                 break

@@ -3,7 +3,6 @@ from tkinter import filedialog, messagebox
 from view import View, LoginView
 import socket
 from cryptography.fernet import Fernet
-import ssl
 
 BUFFER_SIZE = 1024
 
@@ -16,7 +15,6 @@ class Controller:
         self.port = 8000 # Replace with server's port number
         self.fernet = None
         
-
     def run(self) -> None:
         self.root.title("Computer Networks Project")
         self.root.geometry("600x350")
