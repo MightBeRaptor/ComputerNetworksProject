@@ -2,10 +2,9 @@ import socket
 from threading import Thread
 from cryptography.fernet import Fernet
 import os
+import ssl
 
 BUFFER_SIZE = 1024
-
-key = Fernet.generate_key()
 
 USER_DB = {
     "username": "password"
@@ -27,10 +26,10 @@ class Server:
     def handle_client(self, client_socket, client_addr):
         session_id = None
         authenticated = False
-        print(f"[*] New Connection: {client_addr} connected.")
-        
+
         while True:
-            data = client_socket.recv(BUFFER_SIZE).decode("utf-8")
+            data = self.cipherSuite.decrypt(client_socket.recv(BUFFER_SIZE)).decode("utf-8")
+            print(data)
             if not data:
                 break
             if data.startswith("LOGIN"):
@@ -59,6 +58,7 @@ class Server:
             print('[*] Waiting for connection')
             while True:
                 connection, addr = server_tcp.accept()
+                connection.send(self.key)
                 print(f'[*] Established connection from IP {addr[0]} port : {addr[1]}')
                 thread = Thread(target=self.handle_client, args=(connection, addr))
                 thread.start()

@@ -3,6 +3,7 @@ from tkinter import filedialog, messagebox
 from view import View, LoginView
 import socket
 from cryptography.fernet import Fernet
+import ssl
 
 BUFFER_SIZE = 1024
 
@@ -13,7 +14,7 @@ class Controller:
         self.loginView = LoginView(self.root, self)
         self.host = socket.gethostbyname(socket.gethostname()) # Replace with server IP address
         self.port = 8000 # Replace with server's port number
-        self.key = None
+        self.fernet = None
         
 
     def run(self) -> None:
@@ -36,7 +37,9 @@ class Controller:
     def setup_connection(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_tcp:
             client_tcp.connect((self.host, self.port))
-            client_tcp.send(f"LOGIN:{self.loginView.usernameInput.get()}:{self.loginView.passwordInput.get()}".encode("utf-8"))
+            key = client_tcp.recv(BUFFER_SIZE)
+            self.fernet = Fernet(key)
+            client_tcp.send(self.fernet.encrypt(f"LOGIN:{self.loginView.usernameInput.get()}:{self.loginView.passwordInput.get()}".encode("utf-8")))
             response = client_tcp.recv(BUFFER_SIZE).decode("utf-8")
             if response.startswith("Login successful"):
                 self.loginView.unpack_widgets()
