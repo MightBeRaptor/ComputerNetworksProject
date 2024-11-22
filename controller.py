@@ -38,7 +38,9 @@ class Controller:
             client_tcp.connect((self.host, self.port))
             client_tcp.send(f"LOGIN:{self.loginView.usernameInput.get()}:{self.loginView.passwordInput.get()}".encode("utf-8"))
             response = client_tcp.recv(BUFFER_SIZE).decode("utf-8")
-            print(response)
+            if response.startswith("Login successful"):
+                self.loginView.unpack_widgets()
+                self.view.pack_widgets()
 
 if __name__ == "__main__":
     c = Controller()

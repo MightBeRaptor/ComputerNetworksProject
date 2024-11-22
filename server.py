@@ -8,7 +8,7 @@ BUFFER_SIZE = 1024
 key = Fernet.generate_key()
 
 USER_DB = {
-    "username":"password"
+    "username": "password"
 }
 
 SESSIONS = {}
@@ -28,16 +28,26 @@ class Server:
         session_id = None
         authenticated = False
         print(f"[*] New Connection: {client_addr} connected.")
+        
         while True:
             data = client_socket.recv(BUFFER_SIZE).decode("utf-8")
             if not data:
                 break
             if data.startswith("LOGIN"):
                 _, username, password = data.split(":")
-                if authenticate(username, password):
+                if self.authenticate(username, password):
                     session_id = os.urandom(16).hex()
                     SESSIONS[session_id] = username
+                    client_socket.send(f"Login successful, session ID: {session_id}".encode("utf-8"))
                     authenticated = True
+                else:
+                    client_socket.send("Login failed".encode("utf-8"))
+            elif data.startswith("UPLOAD"):
+                return
+            elif data.startswith("DOWNLOAD"):
+                return
+            else:
+                break
         client_socket.close()
         if session_id:
             del SESSIONS[session_id]

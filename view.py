@@ -11,7 +11,7 @@ class View:
 
     def pack_widgets(self) -> None:
         self.titleLabel.place(x=125, y=25)
-        self.logoutButton.place(x=125, y=50)
+        self.logoutButton.place(x=300, y=290)
 
 class LoginView:
     def __init__(self, root, controller) -> None:
