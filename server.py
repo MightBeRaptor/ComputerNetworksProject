@@ -28,7 +28,6 @@ class Server:
 
         while True:
             data = self.cipherSuite.decrypt(client_socket.recv(BUFFER_SIZE)).decode("utf-8")
-            print(data)
             if not data:
                 break
             if data.startswith("LOGIN"):
@@ -36,18 +35,26 @@ class Server:
                 if self.authenticate(username, password):
                     session_id = os.urandom(16).hex()
                     SESSIONS[session_id] = username
-                    client_socket.send(f"Login successful, session ID: {session_id}".encode("utf-8"))
+                    client_socket.send(self.cipherSuite.encrypt(f"Login successful, session ID: {session_id}".encode("utf-8")))
                     authenticated = True
                 else:
                     client_socket.send("Login failed".encode("utf-8"))
             elif data.startswith("UPLOAD"):
                 return
             elif data.startswith("DOWNLOAD"):
-                return
+                filename = data.split()[1]
+                if os.path.exists(filename):
+                    client_socket.send(b'FILE FOUND')
+                    with open(filename, 'rb') as f:
+                        while chunk := f.read(1024):
+                            client_socket.send(chunk)
+                else:
+                    client_socket.send(b'FILE NOT FOUND')
             elif data.startswith("DELETE"):
                 return
             else:
                 break
+        print(f'[*] Terminated connection from IP {client_addr[0]} port : {client_addr[1]}')
         client_socket.close()
         if session_id:
             del SESSIONS[session_id]
