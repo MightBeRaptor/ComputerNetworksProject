@@ -12,6 +12,11 @@ class View:
     def pack_widgets(self) -> None:
         self.titleLabel.place(x=125, y=25)
         self.logoutButton.place(x=300, y=290)
+    
+    def unpack_widgets(self) -> None:
+        self.titleLabel.place_forget()
+        self.logoutButton.place_forget()
+        
 
 class LoginView:
     def __init__(self, root, controller) -> None:
@@ -36,7 +41,9 @@ class LoginView:
     def unpack_widgets(self) -> None:
         self.titleLabel.pack_forget()
         self.usernameLabel.pack_forget()
+        self.usernameInput.delete(0, tk.END)
         self.usernameInput.pack_forget()
         self.passwordLabel.pack_forget()
+        self.passwordInput.delete(0, tk.END)
         self.passwordInput.pack_forget()
         self.loginButton.pack_forget()

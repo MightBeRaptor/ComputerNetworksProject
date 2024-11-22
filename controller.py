@@ -46,6 +46,8 @@ class Controller:
 
     def logout(self) -> None:
         self.socket.send(self.fernet.encrypt("LOGOUT".encode("utf-8")))
+        self.view.unpack_widgets()
+        self.loginView.pack_widgets()
 
     def setup_connection(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
