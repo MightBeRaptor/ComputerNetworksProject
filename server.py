@@ -5,11 +5,11 @@ import os
 
 BUFFER_SIZE = 1024
 
-USER_DB = {
+USER_DB = { # Login information stored in a dictionary
     "username": "password"
 }
 
-SESSIONS = {}
+SESSIONS = {} 
 
 FILE_STORAGE_PATH = "./file_storage" # Directory to store files on server
 
