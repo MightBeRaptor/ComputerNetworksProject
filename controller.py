@@ -44,8 +44,8 @@ class Controller:
 
         # Send file content if validation passes
         with open(file_path, "rb") as f:
-            while chunk := f.read(BUFFER_SIZE):
-                self.socket.send(chunk)
+            file_data = f.read()
+            self.socket.send(file_data)
 
         messagebox.showinfo("Upload Successful", f"File '{file_name}' uploaded successfully.")
 
