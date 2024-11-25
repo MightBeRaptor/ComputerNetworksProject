@@ -20,30 +20,11 @@ class Controller:
 
     def run(self) -> None:
         self.root.title("Computer Networks Project")
-        self.root.geometry("600x350")
+        self.root.geometry("700x400")
         self.loginView.pack_widgets()
         self.root.mainloop()
 
-    def login(self) -> None:
-        self.setup_connection()
-
-    def setup_connection(self):
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((self.host, self.port))
-        key = self.socket.recv(BUFFER_SIZE)
-        self.fernet = Fernet(key)
-        self.socket.send(self.fernet.encrypt(
-            f"LOGIN:{self.loginView.usernameInput.get()}:{self.loginView.passwordInput.get()}".encode("utf-8")))
-        response = self.fernet.decrypt(self.socket.recv(BUFFER_SIZE)).decode("utf-8")
-        if response.startswith("Login successful"):
-            messagebox.showinfo("Login Successful", "Welcome!")
-            self.loginView.unpack_widgets()
-            self.view.pack_widgets()
-        else:
-            messagebox.showerror("Login Failed", "Invalid username or password")
-            self.socket.close()
-
-    def upload(self):
+    def upload(self) -> None:
         file_path = filedialog.askopenfilename()
         if not file_path:
             return
@@ -68,24 +49,48 @@ class Controller:
 
         messagebox.showinfo("Upload Successful", f"File '{file_name}' uploaded successfully.")
 
-    def download(self, filename, savepath):
+    def download(self, filename):
         self.socket.send(self.fernet.encrypt(f'DOWNLOAD:{filename}'.encode("utf-8")))
         response = self.fernet.decrypt(self.socket.recv(BUFFER_SIZE)).decode("utf-8")
         if response.startswith("FILE FOUND"):
-            with open(f"{savepath}/{filename}", "wb") as f:
+            with open(f"{filename}", "wb") as f:
                 while True:
                     data = self.socket.recv(BUFFER_SIZE)
                     if not data:
                         break
                     f.write(data)
-            messagebox.showinfo("Download Successful", f"File '{filename}' downloaded successfully.")
+            print(f"File '{filename}' downloaded successfully.")
         else:
-            messagebox.showerror("Download Failed", f"File '{filename}' not found on the server.")
+            print(f"File '{filename}' not found on the server.")
+
+    def delete(self, filename):
+        self.socket.send(self.fernet.encrypt(f'DELETE:{filename}'.encode("utf-8")))
+        response = self.fernet.decrypt(self.socket.recv(BUFFER_SIZE)).decode("utf-8")
+        if response.startswith("File deleted"):
+            messagebox.showinfo("Delete Successful", f"File '{filename}' deleted successfully.")
+        else:
+            messagebox.showerror("Delete Failed", f"Error: {response}")
+
 
     def logout(self) -> None:
         self.socket.send(self.fernet.encrypt("LOGOUT".encode("utf-8")))
         self.view.unpack_widgets()
         self.loginView.pack_widgets()
+
+    def setup_connection(self):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.connect((self.host, self.port))
+        key = self.socket.recv(BUFFER_SIZE)
+        self.fernet = Fernet(key)
+        self.socket.send(self.fernet.encrypt(
+            f"LOGIN:{self.loginView.usernameInput.get()}:{self.loginView.passwordInput.get()}".encode("utf-8")))
+        response = self.fernet.decrypt(self.socket.recv(BUFFER_SIZE)).decode("utf-8")
+        if response.startswith("Login successful"):
+            messagebox.showinfo("Login Successful", "Welcome, Admin!")
+            self.loginView.unpack_widgets()
+            self.view.pack_widgets()
+        else:
+            messagebox.showerror("Login Failed", "Invalid username or password")
 
 
 if __name__ == "__main__":
