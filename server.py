@@ -3,15 +3,16 @@ from threading import Thread
 from cryptography.fernet import Fernet
 import os
 
-BUFFER_SIZE = 1024
-
 USER_DB = { # Login information stored in a dictionary
     "username": "password"
 }
 
+BUFFER_SIZE = 1024
 SESSIONS = {} 
-
 FILE_STORAGE_PATH = "./file_storage" # Directory to store files on server
+TEXT_FILE_LIMIT = 25 * 1024 * 1024  # 25 MB
+AUDIO_FILE_LIMIT = 0.5 * 1024 * 1024 * 1024  # 0.5 GB
+VIDEO_FILE_LIMIT = 2 * 1024 * 1024 * 1024  # 2 GB
 
 class Server:
     def __init__(self):
@@ -33,6 +34,7 @@ class Server:
 
         while True:
             data = self.cipherSuite.decrypt(client_socket.recv(BUFFER_SIZE)).decode("utf-8")
+            print(data)
             if not data:
                 break
             if data.startswith("LOGIN"):
@@ -45,7 +47,40 @@ class Server:
                 else:
                     client_socket.send("Login failed".encode("utf-8"))
             elif data.startswith("UPLOAD"):
-                return
+                _, file_name, file_size = data.split(":") # Get file details from the data (e.g., filename and file size)
+                file_size = int(file_size)
+
+                # Determine the file type and check size restrictions
+                file_extension = file_name.split('.')[-1].lower()
+                if file_extension in ["txt", "csv"]:  # Text file types
+                    if file_size > TEXT_FILE_LIMIT:
+                        client_socket.send(f"Error: Text file size exceeds 25 MB.".encode("utf-8"))
+                        return
+                elif file_extension in ["mp3", "wav"]:  # Audio file types
+                    if file_size > AUDIO_FILE_LIMIT:
+                        client_socket.send(f"Error: Audio file size exceeds 0.5 GB.".encode("utf-8"))
+                        return
+                elif file_extension in ["mp4", "avi", "mkv"]:  # Video file types
+                    if file_size > VIDEO_FILE_LIMIT:
+                        client_socket.send(f"Error: Video file size exceeds 2 GB.".encode("utf-8"))
+                        return
+                else:
+                    client_socket.send(f"Error: Unsupported file type.".encode("utf-8"))
+                    return
+
+                # Proceed with file upload if size is valid
+                file_path = os.path.join(FILE_STORAGE_PATH, file_name)
+                with open(file_path, "wb") as f:
+                    remaining_size = file_size
+                    while remaining_size > 0:
+                        chunk = client_socket.recv(min(BUFFER_SIZE, remaining_size))
+                        if not chunk:
+                            break
+                        f.write(chunk)
+                        remaining_size -= len(chunk)
+
+                client_socket.send(f"File {file_name} uploaded successfully.".encode("utf-8"))
+
             elif data.startswith("DOWNLOAD"):
                 filename = data.split()[1]
                 if os.path.exists(filename):
@@ -67,6 +102,9 @@ class Server:
                 files = os.listdir(FILE_STORAGE_PATH) #List files in server directory.
                 files_list = "\n".join(files)
                 client_socket.send(f"Files in directory:\n{files_list}".encode("utf-8"))
+            elif data.startswith("CREATE SUBFOLDER"):
+                command, folder_path = data.split(":")[1], data.split(":")[2]
+                folder_path = os.path.join(FILE_STORAGE_PATH, folder_path)
             else:
                 break
         print(f'[*] Terminated connection from IP {client_addr[0]} port : {client_addr[1]}')

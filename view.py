@@ -7,8 +7,10 @@ class View:
         self.controller = controller
 
         self.titleLabel = tk.Label(master=root, font=("Helvetica", 22, "bold"), text="Computer Networks Project")
+        self.uploadButton = tk.Button(master=root, text="Upload")
+        self.downloadButton = tk.Button(master=root, text="Download")
         self.logoutButton = tk.Button(master=root, text="LogOut", command=self.controller.logout)
-
+        
     def pack_widgets(self) -> None:
         self.titleLabel.place(x=125, y=25)
         self.logoutButton.place(x=300, y=290)

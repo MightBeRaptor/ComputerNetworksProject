@@ -30,6 +30,9 @@ class Controller:
         else:
             messagebox.showerror("Login Failed", "Invalid username or password")
 
+    def upload(self, filename) -> None:
+        self.socket.send(self.fernet.encrypt().encode("utf-8"))
+
     def download(self, filename, savepath):
         self.socket.send(self.fernet.encrypt(f'DOWNLOAD {filename}'.encode("utf-8")))
         response = self.fernet.decrypt(self.socket.recv(BUFFER_SIZE)).decode("utf-8")
