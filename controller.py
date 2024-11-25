@@ -24,6 +24,20 @@ class Controller:
         self.loginView.pack_widgets()
         self.root.mainloop()
 
+    def view_directory(self) -> None:
+        # Send the "DIR" command to request the directory listing from the server
+        self.socket.send(self.fernet.encrypt("DIR".encode("utf-8")))
+
+        # Receive the response from the server
+        response = self.fernet.decrypt(self.socket.recv(BUFFER_SIZE)).decode("utf-8")
+
+        # If the response starts with "Files in directory", show the file list
+        if response.startswith("Files in directory"):
+            file_list = response.split("Files in directory:\n")[1]
+            messagebox.showinfo("File Directory", f"Files in the server directory:\n{file_list}")
+        else:
+            messagebox.showerror("Error", "Failed to retrieve directory list")
+
     def upload(self) -> None:
         file_path = filedialog.askopenfilename()
         if not file_path:
@@ -42,10 +56,10 @@ class Controller:
             messagebox.showerror("Upload Failed", response)
             return
 
-        # Send file content if validation passes
+        # Send file content if valida   tion passes
         with open(file_path, "rb") as f:
-            file_data = f.read()
-            self.socket.send(file_data)
+            while chunk := f.read(BUFFER_SIZE):
+                self.socket.send(chunk)
 
         messagebox.showinfo("Upload Successful", f"File '{file_name}' uploaded successfully.")
 
