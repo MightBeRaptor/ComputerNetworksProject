@@ -19,11 +19,11 @@ class Controller:
         
     def run(self) -> None:
         self.root.title("Computer Networks Project")
-        self.root.geometry("600x350")
+        self.root.geometry("700x400")
         self.loginView.pack_widgets()
         self.root.mainloop()
 
-    def upload(self, filename) -> None:
+    def upload(self) -> None:
         file_path = filedialog.askopenfilename()
         if not file_path:
             return
@@ -48,11 +48,11 @@ class Controller:
 
         messagebox.showinfo("Upload Successful", f"File '{file_name}' uploaded successfully.")
 
-    def download(self, filename, savepath):
-        self.socket.send(self.fernet.encrypt(f'DOWNLOAD {filename}'.encode("utf-8")))
+    def download(self, filename):
+        self.socket.send(self.fernet.encrypt(f'DOWNLOAD:{filename}'.encode("utf-8")))
         response = self.fernet.decrypt(self.socket.recv(BUFFER_SIZE)).decode("utf-8")
         if response.startswith("FILE FOUND"):
-            with open(f"{savepath}/{filename}", "wb") as f:
+            with open(f"{filename}", "wb") as f:
                 while True:
                     data = self.socket.recv(BUFFER_SIZE)
                     if not data:

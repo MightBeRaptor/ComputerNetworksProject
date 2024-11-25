@@ -54,19 +54,19 @@ class Server:
                 # Determine the file type and check size restrictions
                 file_extension = file_name.split('.')[-1].lower()
                 if file_extension in ["txt", "csv"]:  # Text file types
-                    if file_size > TEXT_FILE_LIMIT:
+                    if file_size < TEXT_FILE_LIMIT:
                         client_socket.send(f"Error: Text file size exceeds 25 MB.".encode("utf-8"))
                         return
                 elif file_extension in ["mp3", "wav"]:  # Audio file types
-                    if file_size > AUDIO_FILE_LIMIT:
+                    if file_size < AUDIO_FILE_LIMIT:
                         client_socket.send(f"Error: Audio file size exceeds 0.5 GB.".encode("utf-8"))
                         return
                 elif file_extension in ["mp4", "avi", "mkv"]:  # Video file types
-                    if file_size > VIDEO_FILE_LIMIT:
+                    if file_size < VIDEO_FILE_LIMIT:
                         client_socket.send(f"Error: Video file size exceeds 2 GB.".encode("utf-8"))
                         return
                 else:
-                    client_socket.send(f"Error: Unsupported file type.".encode("utf-8"))
+                    client_socket.send(self.cipherSuite.encrypt(f"Error: Unsupported file type.".encode("utf-8")))
                     return
 
                 # Proceed with file upload if size is valid
@@ -82,14 +82,14 @@ class Server:
 
                 client_socket.send(f"File {file_name} uploaded successfully.".encode("utf-8"))
             elif data.startswith("DOWNLOAD"):
-                filename = data.split()[1]
+                _, filename = data.split(":")
                 if os.path.exists(filename):
-                    client_socket.send(b'FILE FOUND')
+                    client_socket.send(self.cipherSuite.encrypt("FILE FOUND".encode("utf-8")))
                     with open(filename, 'rb') as f:
                         while chunk := f.read(1024):
                             client_socket.send(chunk)
                 else:
-                    client_socket.send(b'FILE NOT FOUND')
+                    client_socket.send(self.cipherSuite.encrypt("FILE NOT FOUND".encode("utf-8")))
             elif data.startswith("DELETE"):
                 _, file_name = data.split(":") # Handle file delete request.
                 file_path = os.path.join(FILE_STORAGE_PATH, file_name)

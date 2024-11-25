@@ -8,7 +8,8 @@ class View:
 
         self.titleLabel = tk.Label(master=root, font=("Helvetica", 22, "bold"), text="Computer Networks Project")
         self.uploadButton = tk.Button(master=root, text="Upload", command=self.controller.upload)
-        self.downloadButton = tk.Button(master=root, text="Download", command=self.controller.download)
+        self.downloadButton = tk.Button(master=root, text="Download", command=lambda: self.controller.download(self.downloadFileName.get()))
+        self.downloadFileName = tk.Entry(master=root)
         self.deleteFileButton = tk.Button(master=root, text="Delete File in Server")
         self.viewDirectoryButton = tk.Button(master=root, text="View Directories")
         self.createSubfolderButton = tk.Button(master=root, text="Create Subfolder")
@@ -16,12 +17,25 @@ class View:
         self.logoutButton = tk.Button(master=root, text="LogOut", command=self.controller.logout)
         
     def pack_widgets(self) -> None:
-        self.titleLabel.place(x=125, y=25)
-        self.logoutButton.place(x=300, y=290)
+        self.titleLabel.pack(pady=10)
+        self.uploadButton.pack(pady=10)
+        self.downloadButton.pack(pady=10)
+        self.downloadFileName.pack(pady=10)
+        self.deleteFileButton.pack(pady=10)
+        self.viewDirectoryButton.pack(pady=10)
+        self.createSubfolderButton.pack(pady=10)
+        self.deleteSubfolderButton.pack(pady=10)
+        self.logoutButton.pack(pady=10)
     
     def unpack_widgets(self) -> None:
-        self.titleLabel.place_forget()
-        self.logoutButton.place_forget()
+        self.titleLabel.pack_forget()
+        self.uploadButton.pack_forget()
+        self.downloadButton.pack_forget()
+        self.deleteFileButton.pack_forget()
+        self.viewDirectoryButton.pack_forget()
+        self.createSubfolderButton.pack_forget()
+        self.deleteSubfolderButton.pack_forget()
+        self.logoutButton.pack_forget()
         
 
 class LoginView:
