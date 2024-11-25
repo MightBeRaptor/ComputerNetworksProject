@@ -7,8 +7,12 @@ class View:
         self.controller = controller
 
         self.titleLabel = tk.Label(master=root, font=("Helvetica", 22, "bold"), text="Computer Networks Project")
-        self.uploadButton = tk.Button(master=root, text="Upload")
-        self.downloadButton = tk.Button(master=root, text="Download")
+        self.uploadButton = tk.Button(master=root, text="Upload", command=self.controller.upload)
+        self.downloadButton = tk.Button(master=root, text="Download", command=self.controller.download)
+        self.deleteFileButton = tk.Button(master=root, text="Delete File in Server")
+        self.viewDirectoryButton = tk.Button(master=root, text="View Directories")
+        self.createSubfolderButton = tk.Button(master=root, text="Create Subfolder")
+        self.deleteSubfolderButton = tk.Button(master=root, text="Delete Subfolder")
         self.logoutButton = tk.Button(master=root, text="LogOut", command=self.controller.logout)
         
     def pack_widgets(self) -> None:

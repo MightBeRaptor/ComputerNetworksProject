@@ -2,6 +2,7 @@ import socket
 from threading import Thread
 from cryptography.fernet import Fernet
 import os
+import shutil
 
 USER_DB = { # Login information stored in a dictionary
     "username": "password"
@@ -80,7 +81,6 @@ class Server:
                         remaining_size -= len(chunk)
 
                 client_socket.send(f"File {file_name} uploaded successfully.".encode("utf-8"))
-
             elif data.startswith("DOWNLOAD"):
                 filename = data.split()[1]
                 if os.path.exists(filename):
@@ -105,6 +105,8 @@ class Server:
             elif data.startswith("CREATE SUBFOLDER"):
                 command, folder_path = data.split(":")[1], data.split(":")[2]
                 folder_path = os.path.join(FILE_STORAGE_PATH, folder_path)
+            elif data.startswith("DELETE SUBFOLDER"):
+                command, folder_path = data.split(":")[1], data.split(":")[2]
             else:
                 break
         print(f'[*] Terminated connection from IP {client_addr[0]} port : {client_addr[1]}')
