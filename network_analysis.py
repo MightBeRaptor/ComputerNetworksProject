@@ -8,9 +8,9 @@ def start_time():
 
 # function to initially create dataframe
 def initialize_stats_dataframe():
-    columns = ["file_name", "file_size", "transfer_time", "data_rate"]
-    dataframe = pd.DataFrame(columns=columns)
-    dataframe.to_csv("statistics_dataframe.csv", index=False)
+    if not os.path.exists("statistics_dataframe.csv"):
+        columns = ["file_name", "file_size", "transfer_time", "data_rate"]
+        pd.DataFrame(columns=columns).to_csv("statistics_dataframe.csv", index=False)
 
 # function to obtain and log the statistics for analysis in a .csv file
 def log_statistics(starting_time, file_path):
@@ -35,12 +35,6 @@ def log_statistics(starting_time, file_path):
         "data_rate": data_rate
     }
 
-    # read csv into dataframe
-    stats_dataframe = pd.read_csv("statistics_dataframe.csv")
-
-    # add statistics into dataframe
-    stats_dataframe = pd.concat([stats_dataframe, pd.DataFrame([new_stats])], ignore_index=True)
-
-    # use dataframe for updated csv
-    stats_dataframe.to_csv("statistics_dataframe.csv", index=False)
-
+    # appends new statistics into csv
+    stats_df = pd.DataFrame([new_stats])
+    stats_df.to_csv("statistics_dataframe.csv", mode="a", header=not os.path.exists("statistics_dataframe.csv"),index=False)
