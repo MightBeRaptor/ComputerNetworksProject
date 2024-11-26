@@ -33,24 +33,27 @@ class Controller:
 
         # Prepare the upload command
         command = f"UPLOAD:{file_name}:{file_size}"
-        self.socket.send(self.fernet.encrypt(command.encode("utf-8")))
+        self.socket.sendall(self.fernet.encrypt(command.encode("utf-8")))
 
         # Receive server response
         response = self.fernet.decrypt(self.socket.recv(BUFFER_SIZE)).decode("utf-8")
+        print(response)
         if response.startswith("Error"):
             messagebox.showerror("Upload Failed", response)
             return
 
         # Send file content if validation passes
-        with open(file_path, "rb") as f:
+        with open(file_path, 'rb') as f:
             while chunk := f.read(BUFFER_SIZE):
-                self.socket.send(chunk)
+                self.socket.sendall(chunk)
+            self.socket.sendall(b"EOF")
 
         messagebox.showinfo("Upload Successful", f"File '{file_name}' uploaded successfully.")
 
     def download(self, filename):
         self.socket.send(self.fernet.encrypt(f'DOWNLOAD:{filename}'.encode("utf-8")))
         response = self.fernet.decrypt(self.socket.recv(BUFFER_SIZE)).decode("utf-8")
+        print(response)
         if response.startswith("FILE FOUND"):
             with open(f"{filename}", "wb") as f:
                 while True:
@@ -61,6 +64,30 @@ class Controller:
             print(f"File '{filename}' downloaded successfully.")
         else:
             print(f"File '{filename}' not found on the server.")
+
+    def delete(self, filename):
+        self.socket.send(self.fernet.encrypt(f'DELETE:{filename}'.encode("utf-8")))
+        response = self.fernet.decrypt(self.socket.recv(BUFFER_SIZE)).decode("utf-8")
+        if response.startswith(f"File {filename} deleted"):
+            messagebox.showinfo("Delete Successful", f"File '{filename}' deleted successfully.")
+        else:
+            messagebox.showerror("Delete Failed", f"Error: {response}")
+
+    def view_directory(self) -> None:
+        # Send the "DIR" command to request the directory listing from the server
+        self.socket.send(self.fernet.encrypt("DIR".encode("utf-8")))
+
+        # Receive the response from the server
+        response = self.fernet.decrypt(self.socket.recv(BUFFER_SIZE)).decode("utf-8")
+
+        # If the response starts with "Files in directory", show the file list
+        if response.startswith("Files in directory"):
+            file_list = response.split("Files in directory:\n")[1]
+            print(file_list)
+            self.view.viewDirectories.insert(tk.END, file_list)
+            # messagebox.showinfo("File Directory", f"Files in the server directory:\n{file_list}")
+        else:
+            messagebox.showerror("Error", "Failed to retrieve directory list")
 
     def logout(self) -> None:
         self.socket.send(self.fernet.encrypt("LOGOUT".encode("utf-8")))

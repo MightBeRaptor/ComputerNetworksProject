@@ -31,7 +31,6 @@ class Server:
 
     def handle_client(self, client_socket, client_addr):
         session_id = None
-        authenticated = False
 
         while True:
             data = self.cipherSuite.decrypt(client_socket.recv(BUFFER_SIZE)).decode("utf-8")
@@ -44,7 +43,6 @@ class Server:
                     session_id = os.urandom(16).hex()
                     SESSIONS[session_id] = username
                     client_socket.send(self.cipherSuite.encrypt(f"Login successful, session ID: {session_id}".encode("utf-8")))
-                    authenticated = True
                 else:
                     client_socket.send("Login failed".encode("utf-8"))
             elif data.startswith("UPLOAD"):
@@ -68,19 +66,26 @@ class Server:
                 else:
                     client_socket.send(self.cipherSuite.encrypt(f"Error: Unsupported file type.".encode("utf-8")))
                     return
-
+                client_socket.send(self.cipherSuite.encrypt(f"File type supported".encode("utf-8")))
                 # Proceed with file upload if size is valid
                 file_path = os.path.join(FILE_STORAGE_PATH, file_name)
                 try:
-                    with open(file_path, "wb") as f:
+                    with open(file_path, 'wb') as f:
+                        print("File has been opened")
+                        buffer = b""
                         remaining_size = file_size
-                        while remaining_size > 0:
-                            chunk = client_socket.recv(min(BUFFER_SIZE, remaining_size))
-                            if not chunk:
+                        while True:
+                            print("In while loop")
+                            chunk = client_socket.recv(BUFFER_SIZE)
+                            print(chunk.decode())
+                            if b"EOF" in chunk:
+                                buffer += data.split(b"EOF")[0]
+                                f.write(buffer)
                                 break
-                            f.write(chunk)
+                            buffer += chunk
+                            f.write(buffer)
                             remaining_size -= len(chunk)
-                
+                            buffer = b""
                     if remaining_size == 0:
                         client_socket.send(f"File {file_name} uploaded successfully.".encode("utf-8"))
                     else:
@@ -95,7 +100,7 @@ class Server:
 
             elif data.startswith("DOWNLOAD"):
                 _, filename = data.split(":")
-                if os.path.exists(filename):
+                if os.path.exists(f"./{FILE_STORAGE_PATH}/{filename}"):
                     client_socket.send(self.cipherSuite.encrypt("FILE FOUND".encode("utf-8")))
                     with open(filename, 'rb') as f:
                         while chunk := f.read(1024):
@@ -107,13 +112,21 @@ class Server:
                 file_path = os.path.join(FILE_STORAGE_PATH, file_name)
                 if os.path.exists(file_path):
                     os.remove(file_path)
-                    client_socket.send(f"File {file_name} deleted successfully".encode("utf-8"))
+                    client_socket.send(self.cipherSuite.encrypt(f"File {file_name} deleted successfully".encode("utf-8")))
                 else:
-                    client_socket.send(f"File {file_name} not found.".encode("utf-8"))
+                    client_socket.send(self.cipherSuite.encrypt(f"File {file_name} not found.".encode("utf-8")))
+            
             elif data.startswith("DIR"):
-                files = os.listdir(FILE_STORAGE_PATH) #List files in server directory.
-                files_list = "\n".join(files)
-                client_socket.send(f"Files in directory:\n{files_list}".encode("utf-8"))
+                file_list = []
+                for dirpath, dirnames, filenames in os.walk(FILE_STORAGE_PATH):
+                    for filename in filenames:
+                        file_list.append(os.path.realpath(os.path.join(dirpath, filename)))
+                if file_list:
+                    files_list = "\n".join(file_list)
+                    client_socket.send(self.cipherSuite.encrypt(f"Files in directory:\n{files_list}".encode("utf-8")))
+                else:
+                    client_socket.send(self.cipherSuite.encrypt("No files found".encode("utf-8")))
+            
             elif data.startswith("CREATE SUBFOLDER"):
                 command, folder_path = data.split(":")[1], data.split(":")[2]
                 folder_path = os.path.join(FILE_STORAGE_PATH, folder_path)
