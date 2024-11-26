@@ -68,7 +68,6 @@ class Server:
                     return
                 client_socket.send(self.cipherSuite.encrypt(f"File type supported".encode("utf-8")))
                 # Proceed with file upload if size is valid
-                file_path = os.path.join(FILE_STORAGE_PATH, file_name)
                 try:
                     file_path = os.path.join(FILE_STORAGE_PATH, file_name)
                     with open(file_path, "wb") as f:
@@ -87,12 +86,14 @@ class Server:
                 except Exception as e:
                     client_socket.send(self.cipherSuite.encrypt(f"Error: Failed to upload the file {str(e)}".encode("utf-8")))
             elif data.startswith("DOWNLOAD"):
-                _, filename = data.split(":")
-                if os.path.exists(f"./{FILE_STORAGE_PATH}/{filename}"):
+                _, file_name = data.split(":")
+                if os.path.exists(f"./{FILE_STORAGE_PATH}/{file_name}"):
                     client_socket.send(self.cipherSuite.encrypt("FILE FOUND".encode("utf-8")))
-                    with open(filename, 'rb') as f:
-                        while chunk := f.read(1024):
-                            client_socket.send(chunk)
+                    file_path = os.path.join(FILE_STORAGE_PATH, file_name)
+                    with open(file_path, "rb") as f:
+                        while chunk := f.read(BUFFER_SIZE):
+                            client_socket.sendall(chunk)
+                    client_socket.send(b"END")
                 else:
                     client_socket.send(self.cipherSuite.encrypt("FILE NOT FOUND".encode("utf-8")))
             elif data.startswith("DELETE"):

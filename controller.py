@@ -6,6 +6,7 @@ import os
 from cryptography.fernet import Fernet
 
 BUFFER_SIZE = 1024
+FILE_STORAGE = "./client_file_downloads"
 
 class Controller:
     def __init__(self) -> None:
@@ -16,6 +17,9 @@ class Controller:
         self.port = 8000 # Replace with server's port number
         self.socket = None
         self.fernet = None
+
+        if not os.path.exists(FILE_STORAGE):
+            os.makedirs(FILE_STORAGE)  # Ensure storage directory exists
         
     def run(self) -> None:
         self.root.title("Computer Networks Project")
@@ -46,7 +50,6 @@ class Controller:
         with open(file_path, 'rb') as f:
             while chunk := f.read(BUFFER_SIZE):
                 self.socket.sendall(chunk)
-            self.socket.sendall(b"EOF")
 
         messagebox.showinfo("Upload Successful", f"File '{file_name}' uploaded successfully.")
 
@@ -55,13 +58,20 @@ class Controller:
         response = self.fernet.decrypt(self.socket.recv(BUFFER_SIZE)).decode("utf-8")
         print(response)
         if response.startswith("FILE FOUND"):
-            with open(f"{filename}", "wb") as f:
-                while True:
-                    data = self.socket.recv(BUFFER_SIZE)
-                    if not data:
-                        break
-                    f.write(data)
-            print(f"File '{filename}' downloaded successfully.")
+            try:
+                file_path = os.path.join(FILE_STORAGE, filename)
+                with open(file_path, "wb") as f:
+                    while True:
+                        data = self.socket.recv(BUFFER_SIZE)
+                        print(data.decode())
+                        if b"END" in data:
+                            data = data.split(b"END")[0]
+                            f.write(data)
+                            break
+                        f.write(data)
+                messagebox.showinfo(f"File '{filename}' downloaded successfully.")
+            except Exception as e:
+                messagebox.showerror(f"Error: File could not download successfully {str(e)}")
         else:
             print(f"File '{filename}' not found on the server.")
 
