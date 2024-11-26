@@ -70,22 +70,15 @@ class Server:
                 # Proceed with file upload if size is valid
                 file_path = os.path.join(FILE_STORAGE_PATH, file_name)
                 try:
-                    with open(file_path, 'wb') as f:
-                        print("File has been opened")
-                        buffer = b""
+                    file_path = os.path.join(FILE_STORAGE_PATH, file_name)
+                    with open(file_path, "wb") as f:
                         remaining_size = file_size
-                        while True:
-                            print("In while loop")
-                            chunk = client_socket.recv(BUFFER_SIZE)
-                            print(chunk.decode())
-                            if b"EOF" in chunk:
-                                buffer += data.split(b"EOF")[0]
-                                f.write(buffer)
+                        while remaining_size > 0:
+                            chunk = client_socket.recv(min(BUFFER_SIZE, remaining_size))
+                            if not chunk:
                                 break
-                            buffer += chunk
-                            f.write(buffer)
+                            f.write(chunk)
                             remaining_size -= len(chunk)
-                            buffer = b""
                     if remaining_size == 0:
                         client_socket.send(f"File {file_name} uploaded successfully.".encode("utf-8"))
                     else:
@@ -93,11 +86,6 @@ class Server:
                         client_socket.send (self.cipherSuite.encrypt(f"Error: Incomplete file was uploaded".encode("utf-8")))
                 except Exception as e:
                     client_socket.send(self.cipherSuite.encrypt(f"Error: Failed to upload the file {str(e)}".encode("utf-8")))
-
-
-
-
-
             elif data.startswith("DOWNLOAD"):
                 _, filename = data.split(":")
                 if os.path.exists(f"./{FILE_STORAGE_PATH}/{filename}"):
