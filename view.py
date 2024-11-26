@@ -13,9 +13,11 @@ class View:
         self.deleteFileButton = tk.Button(master=root, text="Delete File in Server", command=lambda: self.controller.delete(self.deleteFileName.get()))
         self.deleteFileName = tk.Entry(master=root)
         self.viewDirectoryButton = tk.Button(master=root, text="View Directories", command=self.controller.view_directory)
-        self.viewDirectories = tk.Text(master=root, width=25, height=5)
-        self.createSubfolderButton = tk.Button(master=root, text="Create Subfolder")
-        self.deleteSubfolderButton = tk.Button(master=root, text="Delete Subfolder")
+        self.viewDirectories = tk.Text(master=root, width=50, height=5)
+        self.createSubfolderButton = tk.Button(master=root, text="Create Subfolder", command=self.controller.create_subfolder)
+        self.createSubfolderName = tk.Entry(master=root)
+        self.deleteSubfolderButton = tk.Button(master=root, text="Delete Subfolder", command=self.controller.delete_subfolder)
+        self.deleteSubfolderName = tk.Entry(master=root)
         self.logoutButton = tk.Button(master=root, text="LogOut", command=self.controller.logout)
         
     def pack_widgets(self) -> None:
@@ -28,7 +30,9 @@ class View:
         self.viewDirectoryButton.pack(pady=5)
         self.viewDirectories.pack(pady=5)
         self.createSubfolderButton.pack(pady=5)
+        self.createSubfolderName.pack(pady=5)
         self.deleteSubfolderButton.pack(pady=5)
+        self.deleteSubfolderName.pack(pady=5)
         self.logoutButton.pack(pady=5)
     
     def unpack_widgets(self) -> None:

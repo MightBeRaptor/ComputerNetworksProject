@@ -98,7 +98,11 @@ class Server:
                     client_socket.send(self.cipherSuite.encrypt("FILE NOT FOUND".encode("utf-8")))
             elif data.startswith("DELETE"):
                 _, file_name = data.split(":") # Handle file delete request.
-                file_path = os.path.join(FILE_STORAGE_PATH, file_name)
+                file_path = None
+                for root, dirs, files in os.walk(FILE_STORAGE_PATH):
+                    if file_name in files:
+                        file_path = os.path.join(root, file_name)
+                        break
                 if os.path.exists(file_path):
                     os.remove(file_path)
                     client_socket.send(self.cipherSuite.encrypt(f"File {file_name} deleted successfully".encode("utf-8")))
@@ -116,11 +120,22 @@ class Server:
                 else:
                     client_socket.send(self.cipherSuite.encrypt("No files found".encode("utf-8")))
             
-            elif data.startswith("CREATE SUBFOLDER"):
-                command, folder_path = data.split(":")[1], data.split(":")[2]
-                folder_path = os.path.join(FILE_STORAGE_PATH, folder_path)
-            elif data.startswith("DELETE SUBFOLDER"):
-                command, folder_path = data.split(":")[1], data.split(":")[2]
+            elif data.startswith("SUBFOLDERCREATE"):
+                command, folder_name = data.split(":")
+                try:
+                    folder_path = os.path.join(FILE_STORAGE_PATH, folder_name)
+                    os.makedirs(folder_path)
+                    client_socket.send(self.cipherSuite.encrypt(f"Success, {folder_name} subfolder created".encode("utf-8")))
+                except Exception as e:
+                    client_socket.send(self.cipherSuite.encrypt(f"Failure: {folder_name} could not be created".encode("utf-8")))
+            elif data.startswith("SUBFOLDERDELETE"):
+                command, folder_name = data.split(":")
+                try:
+                    folder_path = os.path.join(FILE_STORAGE_PATH, folder_name)
+                    shutil.rmtree(folder_path)
+                    client_socket.send(self.cipherSuite.encrypt(f"Success: {folder_name} subfolder deleted".encode("utf-8")))
+                except Exception as e:
+                    client_socket.send(self.cipherSuite.encrypt(f"Failure: {folder_name} could not be deleted".encode("utf-8")))
             else:
                 break
         print(f'[*] Terminated connection from IP {client_addr[0]} port : {client_addr[1]}')

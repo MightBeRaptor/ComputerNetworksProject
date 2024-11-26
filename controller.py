@@ -23,7 +23,7 @@ class Controller:
         
     def run(self) -> None:
         self.root.title("Computer Networks Project")
-        self.root.geometry("700x400")
+        self.root.geometry("600x600")
         self.loginView.pack_widgets()
         self.root.mainloop()
 
@@ -98,6 +98,22 @@ class Controller:
             # messagebox.showinfo("File Directory", f"Files in the server directory:\n{file_list}")
         else:
             messagebox.showerror("Error", "Failed to retrieve directory list")
+
+    def create_subfolder(self) -> None:
+        self.socket.send(self.fernet.encrypt(f"SUBFOLDERCREATE:{self.view.createSubfolderName.get()}".encode("utf-8")))
+        response = self.fernet.decrypt(self.socket.recv(BUFFER_SIZE)).decode("utf-8")
+        if response.startswith("Success"):
+            messagebox.showinfo("Subfolder Created", response)
+        else:
+            messagebox.showerror("Error", response)
+
+    def delete_subfolder(self) -> None:
+        self.socket.send(self.fernet.encrypt(f"SUBFOLDERDELETE:{self.view.deleteSubfolderName.get()}".encode("utf-8")))
+        response = self.fernet.decrypt(self.socket.recv(BUFFER_SIZE)).decode("utf-8")
+        if response.startswith("Success"):
+            messagebox.showinfo("Subfolder Deleted", response)
+        else:
+            messagebox.showerror("Error", response)
 
     def logout(self) -> None:
         self.socket.send(self.fernet.encrypt("LOGOUT".encode("utf-8")))
