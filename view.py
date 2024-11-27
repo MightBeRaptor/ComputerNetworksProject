@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
+
 class View:
     def __init__(self, root, controller) -> None:
         self.frame = tk.Frame(master=root)
@@ -34,7 +35,7 @@ class View:
         self.deleteSubfolderButton.pack(pady=5)
         self.deleteSubfolderName.pack(pady=5)
         self.logoutButton.pack(pady=5)
-    
+
     def unpack_widgets(self) -> None:
         self.titleLabel.pack_forget()
         self.uploadButton.pack_forget()
@@ -57,7 +58,7 @@ class LoginView:
         self.passwordLabel = tk.Label(master=root, font=("Helvetica", 12, "normal"), text="Password:")
         self.passwordInput = tk.Entry(master=root, show="*")
         self.loginButton = tk.Button(master=root, text="Login", command=self.controller.setup_connection)
-    
+
     def pack_widgets(self) -> None:
         self.titleLabel.pack()
         self.usernameLabel.pack(pady=10)
