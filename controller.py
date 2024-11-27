@@ -8,19 +8,20 @@ from cryptography.fernet import Fernet
 BUFFER_SIZE = 1024
 FILE_STORAGE = "./client_file_downloads"
 
+
 class Controller:
     def __init__(self) -> None:
         self.root = tk.Tk()
         self.view = View(self.root, self)
         self.loginView = LoginView(self.root, self)
-        self.host = socket.gethostbyname(socket.gethostname()) # Replace with server IP address
-        self.port = 8000 # Replace with server's port number
+        self.host = socket.gethostbyname(socket.gethostname())  # Replace with server IP address
+        self.port = 8000  # Replace with server's port number
         self.socket = None
         self.fernet = None
 
         if not os.path.exists(FILE_STORAGE):
             os.makedirs(FILE_STORAGE)  # Ensure storage directory exists
-        
+
     def run(self) -> None:
         self.root.title("Computer Networks Project")
         self.root.geometry("600x600")
@@ -125,7 +126,8 @@ class Controller:
         self.socket.connect((self.host, self.port))
         key = self.socket.recv(BUFFER_SIZE)
         self.fernet = Fernet(key)
-        self.socket.send(self.fernet.encrypt(f"LOGIN:{self.loginView.usernameInput.get()}:{self.loginView.passwordInput.get()}".encode("utf-8")))
+        self.socket.send(self.fernet.encrypt(
+            f"LOGIN:{self.loginView.usernameInput.get()}:{self.loginView.passwordInput.get()}".encode("utf-8")))
         response = self.fernet.decrypt(self.socket.recv(BUFFER_SIZE)).decode("utf-8")
         if response.startswith("Login successful"):
             messagebox.showinfo("Login Successful", "Welcome, Admin!")
@@ -133,6 +135,7 @@ class Controller:
             self.view.pack_widgets()
         else:
             messagebox.showerror("Login Failed", "Invalid username or password")
+
 
 if __name__ == "__main__":
     c = Controller()

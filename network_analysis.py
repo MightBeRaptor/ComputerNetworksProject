@@ -2,15 +2,18 @@ import pandas as pd
 import time
 import os
 
+FILE_STORAGE_PATH = "./file_storage"
+
 # function to obtain start time before file transfer
 def start_time():
     return time.time()
 
 # function to initially create dataframe
 def initialize_stats_dataframe():
-    columns = ["file_name", "file_size", "transfer_time", "data_rate"]
-    dataframe = pd.DataFrame(columns=columns)
-    dataframe.to_csv("statistics_dataframe.csv", index=False)
+    file_path = os.path.join(FILE_STORAGE_PATH, "statistics_dataframe.csv")
+    if not os.path.exists(file_path):
+        columns = ["file_name", "file_size", "transfer_time", "data_rate"]
+        pd.DataFrame(columns=columns).to_csv(file_path, index=False)
 
 # function to obtain and log the statistics for analysis in a .csv file
 def log_statistics(starting_time, file_path):
@@ -35,12 +38,7 @@ def log_statistics(starting_time, file_path):
         "data_rate": data_rate
     }
 
-    # read csv into dataframe
-    stats_dataframe = pd.read_csv("statistics_dataframe.csv")
-
-    # add statistics into dataframe
-    stats_dataframe = pd.concat([stats_dataframe, pd.DataFrame([new_stats])], ignore_index=True)
-
-    # use dataframe for updated csv
-    stats_dataframe.to_csv("statistics_dataframe.csv", index=False)
-
+    # appends new statistics into csv
+    stats_df = pd.DataFrame([new_stats])
+    stats_file_path = os.path.join(FILE_STORAGE_PATH, "statistics_dataframe.csv")
+    stats_df.to_csv(stats_file_path, mode="a", header=not os.path.exists(stats_file_path),index=False)
