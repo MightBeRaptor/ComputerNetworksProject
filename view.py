@@ -9,23 +9,18 @@ class View:
 
         self.titleLabel = tk.Label(master=root, font=("Helvetica", 22, "bold"), text="Computer Networks Project")
         self.uploadButton = tk.Button(master=root, text="Upload", command=self.controller.upload)
-        self.downloadButton = tk.Button(master=root, text="Download",
-                                        command=lambda: self.controller.download(self.downloadFileName.get()))
+        self.downloadButton = tk.Button(master=root, text="Download", command=lambda: self.controller.download(self.downloadFileName.get()))
         self.downloadFileName = tk.Entry(master=root)
-        self.deleteFileButton = tk.Button(master=root, text="Delete File in Server",
-                                          command=lambda: self.controller.delete(self.deleteFileName.get()))
+        self.deleteFileButton = tk.Button(master=root, text="Delete File in Server", command=lambda: self.controller.delete(self.deleteFileName.get()))
         self.deleteFileName = tk.Entry(master=root)
-        self.viewDirectoryButton = tk.Button(master=root, text="View Directories",
-                                             command=self.controller.view_directory)
+        self.viewDirectoryButton = tk.Button(master=root, text="View Directories", command=self.controller.view_directory)
         self.viewDirectories = tk.Text(master=root, width=50, height=5)
-        self.createSubfolderButton = tk.Button(master=root, text="Create Subfolder",
-                                               command=self.controller.create_subfolder)
+        self.createSubfolderButton = tk.Button(master=root, text="Create Subfolder", command=self.controller.create_subfolder)
         self.createSubfolderName = tk.Entry(master=root)
-        self.deleteSubfolderButton = tk.Button(master=root, text="Delete Subfolder",
-                                               command=self.controller.delete_subfolder)
+        self.deleteSubfolderButton = tk.Button(master=root, text="Delete Subfolder", command=self.controller.delete_subfolder)
         self.deleteSubfolderName = tk.Entry(master=root)
         self.logoutButton = tk.Button(master=root, text="LogOut", command=self.controller.logout)
-
+        
     def pack_widgets(self) -> None:
         self.titleLabel.pack(pady=5)
         self.uploadButton.pack(pady=5)
@@ -50,7 +45,7 @@ class View:
         self.createSubfolderButton.pack_forget()
         self.deleteSubfolderButton.pack_forget()
         self.logoutButton.pack_forget()
-
+        
 
 class LoginView:
     def __init__(self, root, controller) -> None:
